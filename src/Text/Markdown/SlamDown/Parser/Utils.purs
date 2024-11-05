@@ -8,31 +8,29 @@ module Text.Markdown.SlamDown.Parser.Utils
   ) where
 
 import Prelude
-
-import Data.Either (fromRight)
+import Data.Either (Either(..))
 import Data.String.CodeUnits (singleton)
 import Data.String.Regex as R
 import Data.String.Regex.Flags as RF
-
+import Parsing (Parser)
+import Parsing.Combinators (skipMany)
+import Parsing.String (string, satisfy)
 import Partial.Unsafe (unsafePartial)
-
-import Text.Parsing.Parser (Parser)
-import Text.Parsing.Parser.Combinators (skipMany)
-import Text.Parsing.Parser.String (string, satisfy)
 
 isWhitespace ∷ Char → Boolean
 isWhitespace = R.test wsRegex <<< singleton
   where
   wsRegex ∷ R.Regex
-  wsRegex = unsafePartial fromRight $
-    R.regex "^\\s$" RF.noFlags
+  wsRegex = unsafePartial fromRight $ R.regex "^\\s$" RF.noFlags
 
 isEmailAddress ∷ String → Boolean
 isEmailAddress = R.test wsEmail
   where
   wsEmail ∷ R.Regex
-  wsEmail = unsafePartial fromRight $
-    R.regex """^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""" RF.noFlags
+  wsEmail = unsafePartial fromRight $ R.regex """^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""" RF.noFlags
+
+fromRight :: forall e a. Partial => Either e a -> a
+fromRight e = let (Right x) = e in x
 
 parens ∷ ∀ a. Parser String a → Parser String a
 parens p = string "(" *> skipSpaces *> p <* skipSpaces <* string ")"

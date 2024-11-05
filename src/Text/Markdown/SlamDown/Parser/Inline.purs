@@ -9,10 +9,9 @@ import Prelude
 
 import Control.Alt ((<|>))
 import Control.Lazy as Lazy
-
 import Data.Array as A
 import Data.Bifunctor (lmap)
-import Data.Char.Unicode (isAlphaNum)
+import Data.CodePoint.Unicode (isAlphaNum)
 import Data.Const (Const(..))
 import Data.DateTime as DT
 import Data.Either (Either(..))
@@ -23,16 +22,16 @@ import Data.HugeNum as HN
 import Data.Int as Int
 import Data.List as L
 import Data.Maybe as M
-import Data.String (joinWith, trim) as S
+import Data.String (CodePoint)
+import Data.String (fromCodePointArray, joinWith, trim) as S
 import Data.String.CodeUnits (fromCharArray, singleton, toCharArray) as S
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), fst, snd)
 import Data.Validation.Semigroup as V
-
-import Text.Parsing.Parser as P
-import Text.Parsing.Parser.Combinators as PC
-import Text.Parsing.Parser.String as PS
-
+import Parsing as P
+import Parsing.Combinators as PC
+import Parsing.String as PS
+import Parsing.String.Basic as PS
 import Text.Markdown.SlamDown.Parser.Utils as PU
 import Text.Markdown.SlamDown.Syntax as SD
 
@@ -64,6 +63,14 @@ someOf =
   map (S.fromCharArray <<< A.fromFoldable)
     <<< L.some
     <<< PS.satisfy
+
+someOfCodePoint
+  ∷ (CodePoint → Boolean)
+  → P.Parser String String
+someOfCodePoint =
+  map (S.fromCodePointArray <<< A.fromFoldable)
+    <<< L.some
+    <<< PS.satisfyCodePoint
 
 manyOf
   ∷ (Char → Boolean)
@@ -159,7 +166,7 @@ inlines = L.many inline2 <* PS.eof
       Left e → P.fail e
 
   alphaNumStr ∷ P.Parser String (SD.Inline a)
-  alphaNumStr = SD.Str <$> someOf isAlphaNum
+  alphaNumStr = SD.Str <$> someOfCodePoint isAlphaNum
 
   emphasis
     ∷ P.Parser String (SD.Inline a)
@@ -255,7 +262,7 @@ inlines = L.many inline2 <* PS.eof
       pure $ map (SD.FormField l r) fe
     where
     label =
-      someOf isAlphaNum
+      someOfCodePoint isAlphaNum
       <|> (S.fromCharArray
              <<< A.fromFoldable
              <$> (PS.string "[" *> PC.manyTill PS.anyChar (PS.string "]")))
