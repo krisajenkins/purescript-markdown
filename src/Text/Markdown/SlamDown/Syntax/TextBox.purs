@@ -3,6 +3,7 @@ module Text.Markdown.SlamDown.Syntax.TextBox
   , TextBox(..)
   , transTextBox
   , traverseTextBox
+  , eraseMillis
   ) where
 
 import Prelude

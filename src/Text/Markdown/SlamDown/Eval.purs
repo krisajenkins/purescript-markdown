@@ -86,7 +86,3 @@ eval fs = everywhereM b i
   evalExpr ∷ ∀ e. String → (String → String → m e) → SD.Expr e → m (SD.Expr e)
   evalExpr _ _ (SD.Literal a) = pure $ SD.Literal a
   evalExpr l e (SD.Unevaluated s) = SD.Literal <$> e l s
-
-  getValues ∷ ∀ e. SD.Expr (L.List e) → L.List e
-  getValues (SD.Literal vs) = vs
-  getValues _ = L.Nil

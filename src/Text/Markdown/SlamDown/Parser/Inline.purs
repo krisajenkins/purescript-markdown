@@ -30,8 +30,8 @@ import Data.Tuple (Tuple(..), fst, snd)
 import Data.Validation.Semigroup as V
 import Parsing as P
 import Parsing.Combinators as PC
-import Parsing.String as PS
-import Parsing.String.Basic as PS
+import Parsing.String (anyChar, char, eof, satisfy, satisfyCodePoint, string) as PS
+import Parsing.String.Basic (noneOf, oneOf) as PS
 import Text.Markdown.SlamDown.Parser.Utils as PU
 import Text.Markdown.SlamDown.Syntax as SD
 
@@ -79,12 +79,6 @@ manyOf =
   map (S.fromCharArray <<< A.fromFoldable)
     <<< L.many
     <<< PS.satisfy
-
-isNumeric ∷ Char → Boolean
-isNumeric c =
-  s >= "0" && s <= "9"
-  where
-    s = S.singleton c
 
 dash ∷ P.Parser String Unit
 dash = void $ PS.string "-"
@@ -480,7 +474,7 @@ parseTextBox isPlainText eta template =
         M.Just t → pure t
 
     parseNumericValue = do
-      sign ← PC.try (-1 <$ PS.char '-') <|> pure 1
+      _sign ← PC.try (-1 <$ PS.char '-') <|> pure 1
       ms ← digits
       PU.skipSpaces
       gotDot ← PC.optionMaybe dot

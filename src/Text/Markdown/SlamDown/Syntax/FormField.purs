@@ -118,6 +118,7 @@ instance functorArbIdentity ∷ Functor ArbIdentity where
   map f (ArbIdentity x) =
     ArbIdentity $ f x
 
+newtype ArbCompose :: forall k1 k2. (k1 -> Type) -> (k2 -> k1) -> k2 -> Type
 newtype ArbCompose f g a = ArbCompose (f (g a))
 
 getArbCompose
