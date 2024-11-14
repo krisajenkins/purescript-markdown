@@ -1,6 +1,7 @@
 module Text.Markdown.SlamDown.Pretty
   ( prettyPrintMd
   , prettyPrintTextBoxValue
+  , prettyPrintInlines
   ) where
 
 import Prelude
